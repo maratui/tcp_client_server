@@ -33,7 +33,8 @@ void Client::Exec() {
         perror("client connect");
       } else {
         std::string a = client_name_;
-std::cout << "client_name_ = " << a << "; sizeof(a) = " << sizeof(a) << "\n";
+        std::cout << "client_name_ = " << a << "; sizeof(a) = " << sizeof(a)
+                  << "\n";
         send(socket_, client_name_, 23, 0);
       }
 

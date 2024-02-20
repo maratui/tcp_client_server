@@ -4,7 +4,7 @@ FILES = client/* server/*
 
 all: build
 
-build: clean
+build:
 	mkdir -p build
 	mkdir -p bin
 	cd build && \
@@ -18,3 +18,6 @@ clean:
 
 googlestyle:
 	clang-format -style=Google -i $(FILES)
+
+cppcheck:
+	cppcheck --enable=all --suppress=missingIncludeSystem --language=c++ $(FILES)
