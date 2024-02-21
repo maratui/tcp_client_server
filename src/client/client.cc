@@ -1,7 +1,5 @@
 #include "client.h"
 
-#include <iostream>
-
 using namespace tcp_client_serever;
 
 Client::Client(char *argv[]) : client_name_(argv[1]) {
@@ -32,10 +30,8 @@ void Client::Exec() {
                   sizeof(sockaddr_in_)) < 0) {
         perror("client connect");
       } else {
-        std::string a = client_name_;
-        std::cout << "client_name_ = " << a << "; sizeof(a) = " << sizeof(a)
-                  << "\n";
-        send(socket_, client_name_, 23, 0);
+        SetClientString();
+        send(socket_, client_string_.c_str(), client_string_.length(), 0);
       }
 
       close(socket_);
@@ -43,4 +39,21 @@ void Client::Exec() {
 
     sleep(server_connect_time_);
   }
+}
+
+void Client::SetClientString() {
+  const std::size_t kBufferSize = 256;
+  std::size_t written_bytes{};
+  char buf[kBufferSize]{};
+  struct timeval tv {};
+
+  gettimeofday(&tv, NULL);
+  written_bytes =
+      std::strftime(buf, sizeof(buf), "[%F %T", localtime(&tv.tv_sec));
+  written_bytes += snprintf(buf + written_bytes, sizeof(buf) - written_bytes,
+                            ".%06ld] ", tv.tv_usec);
+
+  client_string_.clear();
+  client_string_.append(buf, written_bytes);
+  client_string_.append(client_name_, (int)std::strlen(client_name_));
 }

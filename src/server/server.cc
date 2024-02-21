@@ -1,7 +1,5 @@
 #include "server.h"
 
-#include <iostream>
-
 using namespace tcp_client_serever;
 
 Server::Server(char *argv[]) {
@@ -15,17 +13,17 @@ Server::Server(char *argv[]) {
 }
 
 void Server::Exec(std::mutex &mutex) {
-  listen_ = socket(AF_INET, SOCK_STREAM, 0);
-  if (listen_ < 0) {
+  listener_ = socket(AF_INET, SOCK_STREAM, 0);
+  if (listener_ < 0) {
     perror("server socket");
   } else {
-    if (bind(listen_, (struct sockaddr *)&sockaddr_in_, sizeof(sockaddr_in_)) <
-        0) {
+    if (bind(listener_, (struct sockaddr *)&sockaddr_in_,
+             sizeof(sockaddr_in_)) < 0) {
       perror("server bind");
     } else {
-      listen(listen_, 1);
+      listen(listener_, 1);
       do {
-        socket_ = accept(listen_, NULL, NULL);
+        socket_ = accept(listener_, NULL, NULL);
         if (socket_ < 0) {
           perror("server accept");
         } else {
@@ -34,7 +32,7 @@ void Server::Exec(std::mutex &mutex) {
       } while (socket_ >= 0);
     }
 
-    close(listen_);
+    close(listener_);
   }
 }
 
@@ -44,17 +42,17 @@ void Server::ProcessClient(std::mutex &mutex) {
 }
 
 void Server::Recv(int socket, std::mutex &mutex) {
-  char buf[1024]{};
-  int bytes_read{};
-  std::string recv_text = "";
+  const std::size_t kBufSize = 1024;
+  std::size_t read_bytes{};
+  char buf[kBufSize]{};
+  std::string recv_string = "";
 
-  bytes_read = recv(socket, buf, sizeof(buf), 0);
+  read_bytes = recv(socket, buf, sizeof(buf), 0);
   close(socket);
-  recv_text.append(buf, bytes_read);
+  recv_string.append(buf, read_bytes);
 
   std::lock_guard<std::mutex> lock(mutex);
-  std::cout << recv_text << std::endl;
-  WriteLog(recv_text);
+  WriteLog(recv_string);
 }
 
 void Server::WriteLog(const std::string &log_text) {
@@ -64,17 +62,6 @@ void Server::WriteLog(const std::string &log_text) {
     out << log_text << std::endl;
     out.close();
   } else {
-    ExitWithLog("Error occured when open log file");
-  }
-}
-
-void Server::ExitWithLog(const std::string &log_text) {
-  std::cerr << log_text;
-  if (errno) {
-    std::cerr << ": " << std::strerror(errno) << std::endl;
-    exit(errno);
-  } else {
-    std::cerr << std::endl;
-    exit(EXIT_FAILURE);
+    perror("log.txt");
   }
 }

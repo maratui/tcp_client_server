@@ -25,7 +25,6 @@ class Server {
  private:
   void static Recv(int socket, std::mutex &mutex);
   void static WriteLog(const std::string &log_text);
-  void static ExitWithLog(const std::string &log_text);
   void ProcessClient(std::mutex &mutex);
 
   char *client_name_ = nullptr;
@@ -33,7 +32,7 @@ class Server {
   int server_connect_time_{};
 
   int socket_ = -1;
-  int listen_ = -1;
+  int listener_ = -1;
   struct sockaddr_in sockaddr_in_ {};
 };
 

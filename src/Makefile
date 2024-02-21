@@ -15,6 +15,7 @@ build:
 
 clean:
 	rm -rf bin
+	rm -rf build
 
 googlestyle:
 	clang-format -style=Google -i $(FILES)
